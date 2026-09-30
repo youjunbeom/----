@@ -14,6 +14,8 @@ UNIT_TO_NEWTON = {
     "dyn": 0.00001,
 }
 
+conversion_history = []
+
 
 def convert_force(value, from_unit, to_unit):
     newton = value * UNIT_TO_NEWTON[from_unit]
@@ -32,9 +34,12 @@ def calculate():
         to_unit = to_unit_box.get()
 
         result = convert_force(value, from_unit, to_unit)
+        conversion = f"{value:g} {from_unit} = {result:.12g} {to_unit}"
+        conversion_history.insert(0, conversion)
+        del conversion_history[10:]
 
         result_label.config(
-            text=f"{value:g} {from_unit} = {result:.12g} {to_unit}",
+            text=conversion,
             foreground="blue",
         )
 
@@ -43,6 +48,15 @@ def calculate():
             text=f"입력 오류: {error}",
             foreground="red",
         )
+
+
+def show_history():
+    if conversion_history:
+        history_text = "\n".join(conversion_history)
+    else:
+        history_text = "아직 변환 기록이 없습니다."
+
+    messagebox.showinfo("최근 변환 기록", history_text, parent=window)
 
 
 def clear():
@@ -132,6 +146,12 @@ ttk.Button(
     text="초기화",
     width=15,
     command=clear,
+).pack(side="left", padx=5)
+
+ttk.Button(
+    button_frame,
+    text="최근 변환 기록",
+    command=show_history,
 ).pack(side="left", padx=5)
 
 # 결과 표시

@@ -1,6 +1,6 @@
 # Week 4 Python 프로그램
 
-이 폴더에는 힘 단위 변환 프로그램 두 가지와 원형 봉의 축응력 계산기가 있습니다. 아래 실행 명령은 `week4` 폴더에서 실행하는 기준입니다.
+이 폴더에는 힘 단위 변환 프로그램 두 가지, 원형 봉의 축응력 계산기, CSV 하중 분석 프로그램이 있습니다. 아래 실행 명령은 `week4` 폴더에서 실행하는 기준입니다.
 
 ## 프로그램
 
@@ -9,6 +9,7 @@
 | `force_converter.py` | 터미널에서 힘의 크기를 지원 단위 사이에서 변환합니다. |
 | `force_converter gui.py` | Tkinter 창에서 입력값과 단위를 선택해 힘을 변환합니다. |
 | `coding.py` | 축력과 원형 봉의 직경으로 단면적과 축응력을 계산합니다. |
+| `load_analyzer.py` | `load_bad.csv`의 하중 데이터를 검증·분석하고 응력 결과와 그래프를 저장합니다. |
 
 힘 변환 프로그램의 지원 단위는 `N`, `kN`, `mN`, `μN`, `kgf`, `gf`, `lbf`, `kip`, `dyn`입니다. 콘솔 버전은 단위 입력에서 공백을 제거하고 대소문자를 구분하지 않습니다. GUI 버전은 목록에서 단위를 선택합니다.
 
@@ -18,7 +19,8 @@
 
 - Python 3.6 이상이 필요합니다. (사용된 f-string 문법 기준)
 - `force_converter gui.py`를 실행하려면 Tkinter와 Tcl/Tk가 포함된 Python 환경이 필요합니다.
-- 별도의 외부 Python 패키지는 사용하지 않습니다. 콘솔 프로그램 두 개는 표준 라이브러리만 사용하며, GUI 프로그램은 Tkinter 표준 라이브러리를 사용합니다.
+- 힘 변환기와 `coding.py`는 Python 표준 라이브러리만 사용합니다. GUI 프로그램은 Tkinter가 필요합니다.
+- `load_analyzer.py`는 CSV 읽기와 응력 계산에 표준 라이브러리를 사용하며, 그래프 저장에는 `matplotlib`가 필요합니다. 설치되지 않았다면 `python -m pip install matplotlib`로 설치합니다.
 
 ## 실행
 
@@ -28,7 +30,23 @@
 python .\force_converter.py
 python ".\force_converter gui.py"
 python .\coding.py
+python .\load_analyzer.py
 ```
+
+## CSV 하중 분석기
+
+`load_analyzer.py`는 스크립트와 같은 폴더의 `load_bad.csv`를 읽습니다. 해당 파일이 없으면 사용자 `Downloads` 폴더의 `load_bad.csv`를 찾습니다. CSV에는 다음 열이 있어야 합니다.
+
+| 열 이름 | 의미 | 단위 |
+|---|---|---|
+| `time_s` | 측정 시간 | s |
+| `force_N` | 하중 | N |
+
+응력 계산에 사용하는 단면적은 스크립트의 `area_mm2 = 100`으로 설정되어 있습니다. 응력은 `force_N / area_mm2`로 계산하며, `N/mm²`와 같은 `MPa` 단위로 저장합니다. 단면적을 바꾸려면 이 값을 수정합니다.
+
+실행 후 유효 데이터 수, 제외한 행수, 최대 하중과 해당 시간, 최대 응력과 해당 시간을 출력합니다. 입력 CSV가 있는 폴더에 `load_result.csv`와 `stress_plot.png`를 생성합니다. 결과 CSV에는 입력 열과 계산된 `stress_MPa` 열이 포함됩니다. 그래프는 시간에 따른 응력을 점과 선으로 표시합니다. 입력 `load_bad.csv`는 수정하지 않습니다.
+
+`time_s` 또는 `force_N` 값이 비어 있거나 숫자가 아니거나 유한한 숫자가 아니면 해당 원본 CSV 행 번호와 문제값을 출력하고 그 행을 계산, 결과 CSV, 그래프에서 제외합니다. 데이터 행에 유효한 값이 하나도 없으면 계산과 출력 파일 저장을 중단합니다. 입력 파일을 찾지 못했거나 필요한 열이 없을 때도 오류를 출력하고 중단합니다. `matplotlib`가 없으면 계산과 CSV 저장은 수행하고 그래프 대신 설치 안내를 출력합니다.
 
 ## 정상 입력 예시
 
